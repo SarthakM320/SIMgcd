@@ -21,9 +21,9 @@ class OfficeHome(Dataset):
         self.transform = transform
 
         if split == 'train':
-            self.data = f'OfficeHomeDataset_10072016/{split}_2.csv'
+            self.data = f'/Users/sarthakm/Desktop/biplabsir_research/gcd/OfficeHomeDataset_10072016/{split}_2.csv'
         else:
-            self.data = f'OfficeHomeDataset_10072016/{split}.csv'
+            self.data = f'/Users/sarthakm/Desktop/biplabsir_research/gcd/OfficeHomeDataset_10072016/{split}.csv'
 
 
         self.data = pd.read_csv(self.data)
@@ -36,7 +36,7 @@ class OfficeHome(Dataset):
         return len(self.target)
     
     def __getitem__(self, idx):
-        image = self.transform(self.loader(self.images[idx]))
+        image = self.transform(self.loader('/Users/sarthakm/Desktop/biplabsir_research/gcd/'+self.images[idx]))
         target = self.target[idx]
 
         if self.target_transform:
@@ -100,14 +100,14 @@ def get_officehome_datasets(train_transform, test_transform, train_classes=range
 
     # Split into training and validation sets
     val_dataset_labelled = OfficeHome(transform=train_transform,split = 'val')
-    val_dataset_labelled.transform = test_transform
-    test_dataset = OfficeHome(transform=test_transform, split='test')
+    val_dataset_labelled.transform = train_transform
+    test_dataset = OfficeHome(transform=train_transform, split='test')
 
     # Either split train into train and val or use test set as val
 
     all_datasets = {
         'train_labelled': train_dataset_labelled,
-        'train_unlabelled': None,
+        'train_unlabelled': test_dataset,
         'val': val_dataset_labelled,
         'test': test_dataset,
     }

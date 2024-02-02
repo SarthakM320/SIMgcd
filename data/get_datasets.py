@@ -58,14 +58,14 @@ def get_datasets(dataset_name, train_transform, test_transform, args):
     #         dataset.target_transform = target_transform
 
     # Train split (labelled and unlabelled classes) for training
-    train_dataset = MergedDataset(labelled_dataset=deepcopy(datasets['train_labelled']),
-                                  unlabelled_dataset=None)
-
     test_dataset = datasets['test']
+    train_dataset = MergedDataset(labelled_dataset=deepcopy(datasets['train_labelled']),
+                                  unlabelled_dataset=test_dataset)
+
     # unlabelled_train_examples_test = deepcopy(datasets['train_unlabelled'])
     # unlabelled_train_examples_test.transform = test_transform
 
-    return train_dataset, test_dataset, None, datasets
+    return train_dataset, test_dataset, test_dataset, datasets
 
 
 def get_class_splits(args):

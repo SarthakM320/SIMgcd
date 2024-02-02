@@ -55,7 +55,8 @@ def train(student, train_loader, test_loader, unlabelled_train_loader, args):
             mask_lab = mask_lab[:, 0]
 
             # class_labels, mask_lab = class_labels.cuda(non_blocking=True), mask_lab.cuda(non_blocking=True).bool()
-            # images = torch.cat(images, dim=0).cuda(non_blocking=True)
+            images = torch.cat(images, dim=0)
+            # images = images.cuda(non_blocking=True)
 
             with torch.cuda.amp.autocast(fp16_scaler is not None):
                 student_proj, student_out = student(images)
@@ -73,7 +74,7 @@ def train(student, train_loader, test_loader, unlabelled_train_loader, args):
                 cluster_loss += args.memax_weight * me_max_loss
 
                 # represent learning, unsup
-                contrastive_logits, contrastive_labels = info_nce_logits(features=student_proj)
+                contrastive_logits, contrastive_labels = info_nce_logits(features=student_proj, device = args.device)
                 contrastive_loss = torch.nn.CrossEntropyLoss()(contrastive_logits, contrastive_labels)
 
                 # representation learning, sup
@@ -109,7 +110,7 @@ def train(student, train_loader, test_loader, unlabelled_train_loader, args):
 
         args.logger.info('Train Epoch: {} Avg Loss: {:.4f} '.format(epoch, loss_record.avg))
 
-        args.logger.info('Testing on unlabelled examples in the training data...')
+        # args.logger.info('Testing on unlabelled examples in the training data...')
         # all_acc, old_acc, new_acc = test(student, unlabelled_train_loader, epoch=epoch, save_name='Train ACC Unlabelled', args=args)
         args.logger.info('Testing on disjoint test set...')
         all_acc_test, old_acc_test, new_acc_test = test(student, test_loader, epoch=epoch, save_name='Test ACC', args=args)
@@ -210,6 +211,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     # device = torch.device('cuda:0')
     device = 'cpu'
+    args.device = device
     args = get_class_splits(args)
 
     args.num_labeled_classes = len(args.train_classes)
