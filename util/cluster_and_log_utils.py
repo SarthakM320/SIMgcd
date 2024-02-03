@@ -160,7 +160,6 @@ def log_accs_from_preds(y_true, y_pred, mask, eval_funcs, save_name, T=None,
     mask = mask.astype(bool)
     y_true = y_true.astype(int)
     y_pred = y_pred.astype(int)
-
     for i, f_name in enumerate(eval_funcs):
 
         acc_f = EVAL_FUNCS[f_name]

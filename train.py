@@ -2,6 +2,7 @@ import argparse
 
 import math
 import numpy as np
+from data.officehome import OfficeHome
 import torch
 import torch.nn as nn
 from torch.optim import SGD, lr_scheduler
@@ -107,6 +108,7 @@ def train(student, train_loader, test_loader, unlabelled_train_loader, args):
             if batch_idx % args.print_freq == 0:
                 args.logger.info('Epoch: [{}][{}/{}]\t loss {:.5f}\t {}'
                             .format(epoch, batch_idx, len(train_loader), loss.item(), pstr))
+            break
 
         args.logger.info('Train Epoch: {} Avg Loss: {:.4f} '.format(epoch, loss_record.avg))
 
@@ -156,8 +158,11 @@ def test(model, test_loader, epoch, save_name, args):
 
     preds, targets = [], []
     mask = np.array([])
-    for batch_idx, (images, label, _) in enumerate(tqdm(test_loader)):
-        # images = images.cuda(non_blocking=True)
+    for data in tqdm(test_loader):
+        images, label, _ = data
+        # images = images.cuda(non_blocking=True)'
+        # print((images[0] == images[1]).all())
+        # images = torch.cat(images, dim = 0)
         with torch.no_grad():
             _, logits = model(images)
             preds.append(logits.argmax(1).cpu().numpy())
@@ -284,10 +289,10 @@ if __name__ == "__main__":
     # --------------------
     train_loader = DataLoader(train_dataset, num_workers=args.num_workers, batch_size=args.batch_size, shuffle=False,
                               sampler=sampler, drop_last=True, pin_memory=True)
-    # test_loader_unlabelled = DataLoader(unlabelled_train_examples_test, num_workers=args.num_workers,
-    #                                     batch_size=256, shuffle=False, pin_memory=False)
-    test_loader= DataLoader(test_dataset, num_workers=args.num_workers,
-                                      batch_size=256, shuffle=False, pin_memory=False)
+    # test_loader_unlabelled = DataLoader(test_dataset, num_workers=args.num_workers,
+    #                                     batch_size=args, shuffle=True)
+    test_loader= DataLoader(unlabelled_train_examples_test, num_workers=args.num_workers,
+                                      batch_size=args.batch_size, shuffle=False)
 
     # ----------------------
     # PROJECTION HEAD
@@ -298,5 +303,5 @@ if __name__ == "__main__":
     # ----------------------
     # TRAIN
     # ----------------------
-    # train(model, train_loader, test_loader_labelled, test_loader_unlabelled, args)
+    # train(model, train_loader, None, test_loader_unlabelled, args)
     train(model, train_loader, test_loader, None, args)

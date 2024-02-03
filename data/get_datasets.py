@@ -7,6 +7,7 @@ from data.imagenet import get_imagenet_100_datasets, get_imagenet_1k_datasets
 from data.cub import get_cub_datasets
 from data.fgvc_aircraft import get_aircraft_datasets
 from data.officehome import get_officehome_datasets
+from torch.utils.data import DataLoader
 
 from copy import deepcopy
 import pickle
@@ -62,10 +63,11 @@ def get_datasets(dataset_name, train_transform, test_transform, args):
     train_dataset = MergedDataset(labelled_dataset=deepcopy(datasets['train_labelled']),
                                   unlabelled_dataset=test_dataset)
 
-    # unlabelled_train_examples_test = deepcopy(datasets['train_unlabelled'])
-    # unlabelled_train_examples_test.transform = test_transform
+    unlabelled_train_examples_test = deepcopy(datasets['train_unlabelled'])
+    unlabelled_train_examples_test.transform = test_transform
+    
 
-    return train_dataset, test_dataset, test_dataset, datasets
+    return train_dataset, test_dataset, unlabelled_train_examples_test, datasets
 
 
 def get_class_splits(args):
